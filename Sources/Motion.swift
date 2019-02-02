@@ -1,4 +1,5 @@
 import CoreMotion
+import CoreLocation
 
 protocol MotionDelegate : class {
     func motionDidGyroscopeUpdate(timestamp: Double, rotationRateX: Double, rotationRateY: Double, rotationRateZ: Double)
@@ -6,6 +7,7 @@ protocol MotionDelegate : class {
     func motionDidMagnetometerUpdate(timestamp: Double, magnetFieldX: Double, magnetFieldY: Double, magnetFieldZ: Double)
     func motionDidAltimeterUpdate(timestamp: Double, pressure: Double, relativeAltitude: Double)
     func motionDidDeviceMotionUpdate(deviceMotion: CMDeviceMotion)
+    func motionDidLocationUpdate(timestamp: Double, longitude: Double, latitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double)
 }
 
 extension MotionDelegate {
@@ -17,9 +19,12 @@ extension MotionDelegate {
     
     func motionDidDeviceMotionUpdate(deviceMotion: CMDeviceMotion) {
     }
+    
+    func motionDidLocationUpdate(timestamp: Double, longitude: Double, latitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double) {
+    }
 }
 
-class Motion: NSObject {
+class Motion: NSObject, CLLocationManagerDelegate {
     weak var delegate: MotionDelegate? = nil
 
     init?(updateInterval: TimeInterval = 0.01, queue: OperationQueue? = nil) {
@@ -33,7 +38,7 @@ class Motion: NSObject {
         self.motionManager.accelerometerUpdateInterval = updateInterval
         self.motionManager.magnetometerUpdateInterval = updateInterval
         self.motionManager.deviceMotionUpdateInterval = updateInterval
-
+        
         let q = queue ?? .main
 
         if self.motionManager.isGyroAvailable {
@@ -66,6 +71,16 @@ class Motion: NSObject {
             }
         }
         
+        if self.motionManager.isDeviceMotionAvailable {
+            self.motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: q) {
+                [weak self] (data, error) in
+                guard let delegate = self?.delegate, let record = data, error == nil else {
+                    return
+                }
+                delegate.motionDidDeviceMotionUpdate(deviceMotion: record)
+            }
+        }
+        
         if CMAltimeter.isRelativeAltitudeAvailable() {
             self.altimeter.startRelativeAltitudeUpdates(to: q) {
                 [weak self] (data, error) in
@@ -76,23 +91,25 @@ class Motion: NSObject {
             }
         }
         
-        if self.motionManager.isDeviceMotionAvailable {
-            self.motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: q) {
-                [weak self] (data, error) in
-                guard let delegate = self?.delegate, let record = data, error == nil else {
-                    return
-                }
-                delegate.motionDidDeviceMotionUpdate(deviceMotion: record)
-            }
+
+        if CLLocationManager.locationServicesEnabled() {
+            self.locationManager.delegate = self
+            self.locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+            self.locationManager.distanceFilter = kCLDistanceFilterNone
+            self.locationManager.startUpdatingLocation()
         }
     }
 
     deinit {
-        if self.motionManager.isDeviceMotionActive {
-            self.motionManager.stopDeviceMotionUpdates()
+        if CLLocationManager.locationServicesEnabled() {
+            self.locationManager.stopUpdatingLocation()
+            self.locationManager.delegate = nil
         }
         if CMAltimeter.isRelativeAltitudeAvailable() {
             self.altimeter.stopRelativeAltitudeUpdates()
+        }
+        if self.motionManager.isDeviceMotionActive {
+            self.motionManager.stopDeviceMotionUpdates()
         }
         if self.motionManager.isMagnetometerActive {
             self.motionManager.stopMagnetometerUpdates()
@@ -105,6 +122,16 @@ class Motion: NSObject {
         }
     }
 
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let delegate = self.delegate else {
+            return
+        }
+        for location in locations {
+            delegate.motionDidLocationUpdate(timestamp: location.timestamp.timeIntervalSince1970 - App.systemBootTime,  longitude: location.coordinate.longitude, latitude: location.coordinate.latitude, altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy)
+        }
+    }
+    
     private let motionManager = CMMotionManager()
     private let altimeter = CMAltimeter()
+    private let locationManager = CLLocationManager()
 }

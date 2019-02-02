@@ -1,6 +1,22 @@
 import UIKit
 
 class App {
+    static let systemBootTime: Double = {
+        var now = Date.timeIntervalSinceReferenceDate + Date.timeIntervalBetween1970AndReferenceDate
+        var now_media = CACurrentMediaTime()
+        return now - now_media
+    }()
+    
+    static let kernelBootTime: Double = {
+        var boottime = timeval()
+        var mib = [CTL_KERN, KERN_BOOTTIME]
+        var size = MemoryLayout.size(ofValue: boottime)
+        guard Darwin.sysctl(&mib, 2, &boottime, &size, nil, 0) != -1 else {
+            return 0.0
+        }
+        return Double(boottime.tv_sec) + (Double(boottime.tv_usec) / Double(USEC_PER_SEC))
+    }()
+    
     class func loadSetting<T>(key: String, def: T) -> T {
         guard let object = UserDefaults.standard.object(forKey: key) else {
             return def

@@ -13,7 +13,8 @@ class Pipeline : NSObject, CameraDelegate, MotionDelegate, EncoderDelegate {
     static let accelerometerData = UInt8(2)
     static let magnetometerData = UInt8(3)
     static let altimeterData = UInt8(4)
-    static let deviceMotionData = UInt8(5)
+    static let locationData = UInt8(5)
+    static let deviceMotionData = UInt8(6)
     static let encoderData = UInt8(8)
     
     private weak var camera: Camera?
@@ -114,6 +115,14 @@ class Pipeline : NSObject, CameraDelegate, MotionDelegate, EncoderDelegate {
     }
     
     func motionDidDeviceMotionUpdate(deviceMotion: CMDeviceMotion) {
+    }
+    
+    func motionDidLocationUpdate(timestamp: Double, longitude: Double, latitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double) {
+        var data = Data(repeating: Pipeline.locationData, count: 1)
+        [timestamp, longitude, latitude, altitude, horizontalAccuracy, verticalAccuracy].withUnsafeBufferPointer {
+            data.append($0)
+        }
+        output?.pipelineDidOutput(data: data)
     }
     
     func encoderDidOutput(timestamp: CMTime, sampleBuffer: CMSampleBuffer) {

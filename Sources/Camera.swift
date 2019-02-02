@@ -25,7 +25,7 @@ class Camera : NSObject {
         }
     }
     
-    init?(position: AVCaptureDevice.Position = .back, preset: AVCaptureSession.Preset = .hd1920x1080, queue: DispatchQueue? = nil) {
+    init?(position: AVCaptureDevice.Position = .back, preset: AVCaptureSession.Preset = .vga640x480, queue: DispatchQueue? = nil) {
         guard let device = Camera.avCaptureDevice(position: position) else {
             return nil
         }

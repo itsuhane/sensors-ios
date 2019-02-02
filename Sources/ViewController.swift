@@ -69,6 +69,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
             UIView.animate(withDuration: 0.2) {
                 self.view.layoutIfNeeded()
             }
+            App.saveSetting(key: "panel", value: panelVisible)
         }
     }
     
