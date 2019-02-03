@@ -6,20 +6,21 @@ class NetworkOutput : NSObject, PipelineOutput {
         get {
             return _description
         }
-        set {
-            _description = newValue
-        }
     }
     
     private let server: NetworkOutputServer
     
-    init?(address: String) {
-        guard let server = NetworkOutputServer(address) else {
+    init?(address: String, port: Int) {
+        guard let server = NetworkOutputServer(address, port: Int32(port)) else {
             return nil
         }
         self.server = server
         super.init()
-        self.description = address
+        if address.isEmpty {
+            self._description = "(check wifi):\(port)"
+        } else {
+            self._description = "\(address):\(port)"
+        }
     }
         
     func pipelineDidOutput(data: Data) {

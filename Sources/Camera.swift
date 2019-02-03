@@ -26,6 +26,16 @@ class Camera : NSObject {
     }
     
     init?(position: AVCaptureDevice.Position = .back, preset: AVCaptureSession.Preset = .vga640x480, queue: DispatchQueue? = nil) {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in }
+            fallthrough
+        case .restricted,.denied:
+            return nil
+        case .authorized:
+            break
+        }
+        
         guard let device = Camera.avCaptureDevice(position: position) else {
             return nil
         }

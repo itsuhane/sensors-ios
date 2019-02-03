@@ -20,7 +20,7 @@ static int guard(int n, const char *err) {
 
 static const int yes = 1;
 
-ServerImpl::ServerImpl(const std::string &address) {
+ServerImpl::ServerImpl(const std::string &address, int port) {
     server_socket = guard(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP), "unable to create server socket");
     guard(setsockopt(server_socket, SOL_SOCKET, SO_NOSIGPIPE, &yes, sizeof(yes)), "unable to set server socket options");
     
@@ -29,7 +29,7 @@ ServerImpl::ServerImpl(const std::string &address) {
     
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(5959);
+    addr.sin_port = htons(port);
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     
     guard(setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)), "could not set reuse");

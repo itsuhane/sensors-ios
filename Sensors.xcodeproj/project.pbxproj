@@ -21,6 +21,7 @@
 		7180430D2197A3BA0061F68C /* VideoToolbox+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7180430C2197A3BA0061F68C /* VideoToolbox+extensions.swift */; };
 		719AA45521A41B4C002C45D7 /* Motion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 719AA45421A41B4C002C45D7 /* Motion.swift */; };
 		71B39B4B21AD45190053CCCF /* AppUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71B39B4A21AD45190053CCCF /* AppUtility.swift */; };
+		71B571572206EFB000F781AE /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71B571562206EFB000F781AE /* Location.swift */; };
 		71D0630621A3194F0021162C /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D0630521A3194F0021162C /* Camera.swift */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +45,7 @@
 		7180430C2197A3BA0061F68C /* VideoToolbox+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoToolbox+extensions.swift"; sourceTree = "<group>"; };
 		719AA45421A41B4C002C45D7 /* Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion.swift; sourceTree = "<group>"; };
 		71B39B4A21AD45190053CCCF /* AppUtility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppUtility.swift; sourceTree = "<group>"; };
+		71B571562206EFB000F781AE /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		71D0630521A3194F0021162C /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -112,6 +114,7 @@
 				716863AB21A805C800A001FA /* Pipeline.swift */,
 				716863AD21A86C1100A001FA /* FileOutput.swift */,
 				716863AF21A8714C00A001FA /* NetworkOutput.swift */,
+				71B571562206EFB000F781AE /* Location.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -210,6 +213,7 @@
 				71B39B4B21AD45190053CCCF /* AppUtility.swift in Sources */,
 				71D0630621A3194F0021162C /* Camera.swift in Sources */,
 				716863AE21A86C1100A001FA /* FileOutput.swift in Sources */,
+				71B571572206EFB000F781AE /* Location.swift in Sources */,
 				716863B021A8714C00A001FA /* NetworkOutput.swift in Sources */,
 				717A991821F9BCF100089970 /* NetworkOutputServerImpl.cpp in Sources */,
 				7145D9AE218C30A800E83C9A /* ViewController.swift in Sources */,

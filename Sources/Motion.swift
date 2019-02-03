@@ -7,7 +7,6 @@ protocol MotionDelegate : class {
     func motionDidMagnetometerUpdate(timestamp: Double, magnetFieldX: Double, magnetFieldY: Double, magnetFieldZ: Double)
     func motionDidAltimeterUpdate(timestamp: Double, pressure: Double, relativeAltitude: Double)
     func motionDidDeviceMotionUpdate(deviceMotion: CMDeviceMotion)
-    func motionDidLocationUpdate(timestamp: Double, longitude: Double, latitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double)
 }
 
 extension MotionDelegate {
@@ -19,12 +18,9 @@ extension MotionDelegate {
     
     func motionDidDeviceMotionUpdate(deviceMotion: CMDeviceMotion) {
     }
-    
-    func motionDidLocationUpdate(timestamp: Double, longitude: Double, latitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double) {
-    }
 }
 
-class Motion: NSObject, CLLocationManagerDelegate {
+class Motion: NSObject {
     weak var delegate: MotionDelegate? = nil
 
     init?(updateInterval: TimeInterval = 0.01, queue: OperationQueue? = nil) {
@@ -90,21 +86,9 @@ class Motion: NSObject, CLLocationManagerDelegate {
                 delegate.motionDidAltimeterUpdate(timestamp: record.timestamp, pressure: record.pressure.doubleValue, relativeAltitude: record.relativeAltitude.doubleValue)
             }
         }
-        
-
-        if CLLocationManager.locationServicesEnabled() {
-            self.locationManager.delegate = self
-            self.locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
-            self.locationManager.distanceFilter = kCLDistanceFilterNone
-            self.locationManager.startUpdatingLocation()
-        }
     }
 
     deinit {
-        if CLLocationManager.locationServicesEnabled() {
-            self.locationManager.stopUpdatingLocation()
-            self.locationManager.delegate = nil
-        }
         if CMAltimeter.isRelativeAltitudeAvailable() {
             self.altimeter.stopRelativeAltitudeUpdates()
         }
@@ -121,17 +105,7 @@ class Motion: NSObject, CLLocationManagerDelegate {
             self.motionManager.stopGyroUpdates()
         }
     }
-
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let delegate = self.delegate else {
-            return
-        }
-        for location in locations {
-            delegate.motionDidLocationUpdate(timestamp: location.timestamp.timeIntervalSince1970 - App.systemBootTime,  longitude: location.coordinate.longitude, latitude: location.coordinate.latitude, altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy)
-        }
-    }
     
     private let motionManager = CMMotionManager()
     private let altimeter = CMAltimeter()
-    private let locationManager = CLLocationManager()
 }

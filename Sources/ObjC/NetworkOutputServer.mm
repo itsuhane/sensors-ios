@@ -5,10 +5,10 @@
 
 ServerImpl *impl;
 
--(nullable instancetype)init:(NSString*)address{
+-(nullable instancetype)init:(NSString*)address port:(int) port{
     if(self = [super init]) {
         try {
-            impl = new ServerImpl([address UTF8String]);
+            impl = new ServerImpl([address UTF8String], port);
         } catch(...) {
             return nil;
         }

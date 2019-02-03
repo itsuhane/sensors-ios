@@ -6,14 +6,13 @@ class FileOutput : NSObject, PipelineOutput {
         get {
             return _description
         }
-        set {
-            _description = newValue
-        }
     }
     
     private let outputStream: OutputStream
         
-    init?(path: String) {
+    init?(name: String) {
+        _description = name
+        let path = "\(App.documentDirectory)/\(name).sensors"
         guard let outputStream = OutputStream(toFileAtPath: path, append: false) else {
             return nil
         }

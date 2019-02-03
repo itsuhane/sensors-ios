@@ -10,7 +10,7 @@
 
 class ServerImpl {
 public:
-    ServerImpl(const std::string &address);
+    ServerImpl(const std::string &address, int port);
     ~ServerImpl();
     void send(const void *data, size_t len);
     

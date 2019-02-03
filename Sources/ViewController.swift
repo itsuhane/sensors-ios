@@ -25,6 +25,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive), name: UIApplication.willResignActiveNotification, object: nil)
+        initLocation()
         unlockGUI()
     }
 
@@ -144,6 +145,18 @@ class ViewController: UIViewController, UITextFieldDelegate {
         self.camera = nil
     }
     
+    func initLocation() {
+        guard let location = Location() else {
+            NSLog("Cannot access location")
+            return
+        }
+        self.location = location
+    }
+    
+    func deinitLocation() {
+        self.location = nil
+    }
+    
     func startCapture() {
         defer {
             captureSwitch.setOn(self.output != nil, animated: true)
@@ -152,33 +165,34 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         if camera == nil {
             startCamera()
+            if camera == nil {
+                return
+            }
+        }
+                
+        if !location!.start() {
+            return
         }
 
-        var output: PipelineOutput
+        let motion = Motion()
+        
+        var output: PipelineOutput?
         if outputSwitch.selectedSegmentIndex == 0 {
-            let fileDescription = App.currentDateTimeString
-            let filePath = "\(App.documentDirectory)/\(fileDescription).sensors"
-            guard let fileOutput = FileOutput(path: filePath) else {
-                return
-            }
-            output = fileOutput
-            output.description = fileDescription
+            output = FileOutput(name: App.currentDateTimeString)
         } else {
-            guard let networkOutput = NetworkOutput(address: "") else {
-                return
-            }
-            output = networkOutput
-            output.description = "\( App.ipv4Address ?? "(check wifi)" ):5959"
+            output = NetworkOutput(address: App.ipv4Address ?? "", port: 5959)
         }
         
-        guard let motion = Motion() else {
+        guard
+            let outputRef = output,
+            let cameraRef = camera,
+            let motionRef = motion,
+            let locationRef = location,
+            let pipeline = Pipeline(camera: cameraRef, motion: motionRef, location: locationRef, output: outputRef, encode: true, saveRawImage: false)
+        else {
             return
         }
         
-        guard let pipeline = Pipeline(camera: self.camera!, motion: motion, output: output, encode: true, saveRawImage: false) else {
-            return
-        }
-
         self.output = output
         self.motion = motion
         self.pipeline = pipeline
@@ -243,6 +257,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var previewLayer: AVCaptureVideoPreviewLayer? = nil
     var camera: Camera? = nil
     var motion: Motion? = nil
+    var location: Location? = nil
     var output: PipelineOutput? = nil
     var pipeline: Pipeline? = nil
 }

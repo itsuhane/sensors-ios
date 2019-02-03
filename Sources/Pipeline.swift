@@ -2,12 +2,12 @@ import CoreMotion
 import CoreMedia
 
 protocol PipelineOutput: class {
-    var description: String { get set }
+    var description: String { get }
     func pipelineDidOutput(data: Data)
     func pipelineDidDrop()
 }
 
-class Pipeline : NSObject, CameraDelegate, MotionDelegate, EncoderDelegate {
+class Pipeline : NSObject, CameraDelegate, MotionDelegate, LocationDelegate, EncoderDelegate {
     static let imageData = UInt8(0)
     static let gyroscopeData = UInt8(1)
     static let accelerometerData = UInt8(2)
@@ -19,11 +19,13 @@ class Pipeline : NSObject, CameraDelegate, MotionDelegate, EncoderDelegate {
     
     private weak var camera: Camera?
     private weak var motion: Motion?
+    private weak var location: Location?
     private weak var output: PipelineOutput?
     private let encoder: Encoder?
     private let saveRawImage: Bool
 
-    init?(camera: Camera, motion: Motion, output: PipelineOutput? = nil, encode: Bool = true, saveRawImage: Bool = false) {
+    init?(camera: Camera, motion: Motion, location: Location, output: PipelineOutput, encode: Bool = true, saveRawImage: Bool = false) {
+        
         if encode {
             guard let encoder = Encoder(width: camera.imageWidth, height: camera.imageHeight, fps: 30) else {
                 return nil
@@ -35,19 +37,23 @@ class Pipeline : NSObject, CameraDelegate, MotionDelegate, EncoderDelegate {
         
         self.camera = camera
         self.motion = motion
+        self.location = location
         self.output = output
         self.saveRawImage = (self.encoder == nil) || saveRawImage
-
+        
         super.init()
         
         self.motion?.delegate = self
+        self.location?.delegate = self
         self.encoder?.delegate = self
         self.camera?.delegate = self
     }
     
     deinit {
+        self.location?.stop()
         self.camera?.delegate = nil
         self.encoder?.delegate = nil
+        self.location?.delegate = nil
         self.motion?.delegate = nil
         self.motion = nil
         self.camera = nil
@@ -96,6 +102,7 @@ class Pipeline : NSObject, CameraDelegate, MotionDelegate, EncoderDelegate {
             data.append($0)
         }
         output?.pipelineDidOutput(data: data)
+        NSLog("ACC: \(timestamp)")
     }
     
     func motionDidMagnetometerUpdate(timestamp: Double, magnetFieldX: Double, magnetFieldY: Double, magnetFieldZ: Double) {
@@ -117,12 +124,13 @@ class Pipeline : NSObject, CameraDelegate, MotionDelegate, EncoderDelegate {
     func motionDidDeviceMotionUpdate(deviceMotion: CMDeviceMotion) {
     }
     
-    func motionDidLocationUpdate(timestamp: Double, longitude: Double, latitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double) {
+    func locationDidUpdate(timestamp: Double, longitude: Double, latitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double) {
         var data = Data(repeating: Pipeline.locationData, count: 1)
         [timestamp, longitude, latitude, altitude, horizontalAccuracy, verticalAccuracy].withUnsafeBufferPointer {
             data.append($0)
         }
         output?.pipelineDidOutput(data: data)
+        NSLog("GPS: \(timestamp) !!!!!!")
     }
     
     func encoderDidOutput(timestamp: CMTime, sampleBuffer: CMSampleBuffer) {
