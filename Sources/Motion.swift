@@ -1,6 +1,8 @@
 import CoreMotion
 import CoreLocation
 
+fileprivate let GRAVITY_NOMINAL = -9.80665
+
 protocol MotionDelegate : class {
     func motionDidGyroscopeUpdate(timestamp: Double, rotationRateX: Double, rotationRateY: Double, rotationRateZ: Double)
     func motionDidAccelerometerUpdate(timestamp: Double, accelerationX: Double, accelerationY: Double, accelerationZ: Double)
@@ -53,7 +55,7 @@ class Motion: NSObject {
                 guard let delegate = self?.delegate, let record = data, error == nil else {
                         return
                 }
-                delegate.motionDidAccelerometerUpdate(timestamp: record.timestamp, accelerationX: record.acceleration.x, accelerationY: record.acceleration.y, accelerationZ: record.acceleration.z)
+                delegate.motionDidAccelerometerUpdate(timestamp: record.timestamp, accelerationX: GRAVITY_NOMINAL*record.acceleration.x, accelerationY: GRAVITY_NOMINAL*record.acceleration.y, accelerationZ: GRAVITY_NOMINAL*record.acceleration.z)
             }
         }
         
