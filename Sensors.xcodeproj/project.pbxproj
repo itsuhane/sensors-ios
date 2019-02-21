@@ -47,6 +47,7 @@
 		71B39B4A21AD45190053CCCF /* AppUtility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppUtility.swift; sourceTree = "<group>"; };
 		71B571562206EFB000F781AE /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		71D0630521A3194F0021162C /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
+		71D164E9221F3A69002E2666 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +64,7 @@
 		7145D99F218C30A800E83C9A = {
 			isa = PBXGroup;
 			children = (
+				71D164E9221F3A69002E2666 /* README.md */,
 				7145D9B7218C30A900E83C9A /* Info.plist */,
 				7145D9BD218C30BE00E83C9A /* Assets */,
 				71AB6A3421FB65EF00565CD7 /* Storyboards */,
